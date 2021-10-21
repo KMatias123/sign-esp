@@ -21,7 +21,7 @@ import java.util.*
 internal object SignESP : PluginModule(
     name = "SignESP",
     category = Category.RENDER,
-    description = "Renders text on signs so u can see them without needing to freecam",
+    description = "Renders text on signs so u can see them without needing to use FreeCam",
     pluginMain = Main
 ) {
     private val textScale by setting("TextScale", 1f, 0.1f..10f, 0.1f)
@@ -31,12 +31,16 @@ internal object SignESP : PluginModule(
     private val tracerAlpha by setting("TracerAlpha", 255, 0..255, 1, { tracers })
 
     // todo: when changing lists in clickgui drops we may want to make this default to true
-    private val wordTracers by setting("WordTracers", false, { tracers })
+    private val wordTracers by setting("WordTracers", false, { tracers }, description = "To add values to the word list you need to use the set command")
     private val wordList = setting(CollectionSetting("WordList", mutableListOf("SalC1"), { false }))
     private val ignoreCase = setting("IgnoreCase", true, { wordTracers })
 
     private val showPosition by setting("ShowPosition", false)
+    private val positionText by setting("PositionText", false, { showPosition })
+
     private val showDistance by setting("ShowDistance", false)
+    private val distanceText by setting("DistanceText", false, { showDistance })
+
     private val yOffSet by setting("YOffset", 0.0, -5.0..5.0, 0.1)
 
     private val renderer = ESPRenderer()
@@ -82,10 +86,24 @@ internal object SignESP : PluginModule(
         }
 
         if (showDistance) {
-            rowsToDraw.add("distance: ${pos.toVec3dCenter().distanceTo(mc.player.position.toVec3dCenter())}")
+
+            val sb = StringBuilder()
+            if (distanceText) {
+                sb.append("distance: ")
+            }
+            sb.append(pos.toVec3dCenter().distanceTo(mc.player.position.toVec3dCenter()))
+
+            rowsToDraw.add(sb.toString())
         }
+
         if (showPosition) {
-            rowsToDraw.add("coordinates: ${pos.toVec3dCenter()}")
+            val sb = StringBuilder()
+            if (positionText) {
+                sb.append("position: ")
+            }
+            sb.append(pos.toVec3dCenter())
+
+            rowsToDraw.add(sb.toString())
         }
 
         rowsToDraw.forEachIndexed { index, text ->
